@@ -83,13 +83,13 @@ class DocumentPart(XmlPart):
         """
         return InlineShapes(self._element.body, self)
 
-    def new_pic_inline(self, image_descriptor, width, height):
+    def new_pic_inline(self, image_descriptor, width, height, inline=True):
         """
         Return a newly-created `w:inline` element containing the image
         specified by *image_descriptor* and scaled based on the values of
         *width* and *height*.
         """
-        return self.new_pic(image_descriptor, width, height, inline=True)
+        return self.new_pic(image_descriptor, width, height, inline=inline)
 
     def new_pic(self, image_descriptor, width, height, inline=True):
         rId, image = self.get_or_add_image(image_descriptor)

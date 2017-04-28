@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 from ..enum.style import WD_STYLE_TYPE
 from ..enum.text import WD_BREAK
 from .font import Font
-from ..shape import InlineShape
+from ..shape import AnchorShape, InlineShape
 from ..shared import Parented
 
 
@@ -46,7 +46,8 @@ class Run(Parented):
         if clear is not None:
             br.clear = clear
 
-    def add_picture(self, image_path_or_stream, width=None, height=None):
+    def add_picture(
+            self, image_path_or_stream, width=None, height=None, inline=True):
         """
         Return an |InlineShape| instance containing the image identified by
         *image_path_or_stream*, added to the end of this run.
@@ -58,10 +59,20 @@ class Run(Parented):
         native size of the picture is calculated using the dots-per-inch
         (dpi) value specified in the image file, defaulting to 72 dpi if no
         value is specified, as is often the case.
+        *inline* boolean true if the picture is inline with text,
+        false if floated.
         """
-        inline = self.part.new_pic_inline(image_path_or_stream, width, height)
-        self._r.add_drawing(inline)
-        return InlineShape(inline)
+        image = self.part.new_pic_inline(
+            image_path_or_stream, width, height, inline=inline
+        )
+        self._r.add_drawing(image)
+
+        if inline:
+            ShapeType = InlineShape
+        else:
+            ShapeType = AnchorShape
+
+        return ShapeType(image)
 
     def add_tab(self):
         """

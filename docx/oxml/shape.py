@@ -106,22 +106,34 @@ class CT_Anchor(CT_Inline):
     """
     ``<w:anchor>`` element, container for a floating shape.
     """
+    simplePos = OneAndOnlyOne('wp:simplePos')
+    positionH = OneAndOnlyOne('wp:positionH')
+    positionV = OneAndOnlyOne('wp:positionV')
+    effectExtent = OneAndOnlyOne('wp:effectExtent')
     wrapSquare = ZeroOrOne('wp:wrapSquare')
 
     @classmethod
     def _inline_xml(cls):
         return (
-            '<wp:anchor %s>\n'
+            '<wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="0" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1" %s>\n'
+            '  <wp:simplePos x="0" y="0" />\n'
+            '  <wp:positionH relativeFrom="margin">\n'
+            '   <wp:align>right</wp:align>\n'
+            '  </wp:positionH>\n'
+            '  <wp:positionV relativeFrom="margin">\n'
+            '   <wp:align>center</wp:align>\n'
+            '  </wp:positionV>\n'
             '  <wp:extent cx="914400" cy="914400"/>\n'
-            '  <wp:wordSquare wrapText="bothSides" />\n'
+            '  <wp:effectExtent l="0" t="0" r="0" b="0" />\n'
+            '  <wp:wrapSquare wrapText="bothSides" />\n'
             '  <wp:docPr id="666" name="unnamed"/>\n'
             '  <wp:cNvGraphicFramePr>\n'
-            '    <a:graphicFrameLocks noChangeAspect="1"/>\n'
+            '    <a:graphicFrameLocks %s noChangeAspect="1"/>\n'
             '  </wp:cNvGraphicFramePr>\n'
-            '  <a:graphic>\n'
+            '  <a:graphic %s>\n'
             '    <a:graphicData uri="URI not set"/>\n'
             '  </a:graphic>\n'
-            '</wp:anchor>' % nsdecls('wp', 'a', 'pic', 'r')
+            '</wp:anchor>' % (nsdecls('wp'), nsdecls('a'), nsdecls('a'))
         )
 
 
@@ -183,7 +195,9 @@ class CT_Picture(BaseOxmlElement):
             '      <a:off x="0" y="0"/>\n'
             '      <a:ext cx="914400" cy="914400"/>\n'
             '    </a:xfrm>\n'
-            '    <a:prstGeom prst="rect"/>\n'
+            '    <a:prstGeom prst="rect">\n'
+            '     <a:avLst />\n'
+            '    </a:prstGeom>\n'
             '  </pic:spPr>\n'
             '</pic:pic>' % nsdecls('pic', 'a', 'r')
         )
