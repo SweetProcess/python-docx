@@ -3,6 +3,12 @@
 from ...unitdata import BaseBuilder
 
 
+class CT_AnchorBuilder(BaseBuilder):
+    __tag__ = 'wp:anchor'
+    __nspfxs__ = ('wp',)
+    __attrs__ = ('distT', 'distB', 'distL', 'distR')
+
+
 class CT_BlipBuilder(BaseBuilder):
     __tag__ = "a:blip"
     __nspfxs__ = ("a",)
@@ -61,3 +67,7 @@ def a_pic():
 
 def an_inline():
     return CT_InlineBuilder()
+
+
+def an_anchor():
+    return CT_AnchorBuilder()

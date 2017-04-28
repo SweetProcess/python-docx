@@ -7,15 +7,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from docx.enum.shape import WD_INLINE_SHAPE
-from docx.oxml.ns import nsmap
-from docx.shared import Parented
+from .enum.shape import WD_INLINE_SHAPE, WD_ANCHOR_SHAPE
+from .oxml.ns import nsmap
+from .shared import Parented
 
 if TYPE_CHECKING:
     from docx.oxml.document import CT_Body
     from docx.oxml.shape import CT_Inline
     from docx.parts.story import StoryPart
     from docx.shared import Length
+
 
 
 class InlineShapes(Parented):
@@ -101,3 +102,30 @@ class InlineShape:
     def width(self, cx: Length):
         self._inline.extent.cx = cx
         self._inline.graphic.graphicData.pic.spPr.cx = cx
+
+
+class AnchorShape(InlineShape):
+    """
+    Proxy for an ``<wp:anchor>`` element, representing the container for a
+    positioned graphical element.
+    """
+
+    @property
+    def type(self):
+        """
+        The type of this anchored shape as a member of
+        ``docx.enum.shape.WD_INLINE_SHAPE``, e.g. ``LINKED_PICTURE``.
+        Read-only.
+        """
+        graphicData = self._inline.graphic.graphicData
+        uri = graphicData.uri
+        if uri == nsmap['pic']:
+            blip = graphicData.pic.blipFill.blip
+            if blip.link is not None:
+                return WD_ANCHOR_SHAPE.LINKED_PICTURE
+            return WD_ANCHOR_SHAPE.PICTURE
+        if uri == nsmap['c']:
+            return WD_ANCHOR_SHAPE.CHART
+        if uri == nsmap['dgm']:
+            return WD_ANCHOR_SHAPE.SMART_ART
+        return WD_ANCHOR_SHAPE.NOT_IMPLEMENTED

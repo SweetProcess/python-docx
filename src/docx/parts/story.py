@@ -6,7 +6,7 @@ from typing import IO, TYPE_CHECKING, Tuple, cast
 
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.opc.part import XmlPart
-from docx.oxml.shape import CT_Inline
+from docx.oxml.shape import CT_Inline, CT_Anchor
 from docx.shared import Length, lazyproperty
 
 if TYPE_CHECKING:
@@ -68,10 +68,17 @@ class StoryPart(XmlPart):
         The element contains the image specified by `image_descriptor` and is scaled
         based on the values of `width` and `height`.
         """
+        return self.new_pic(image_descriptor, width, height, inline=True)
+
+    def new_pic(self, image_descriptor, width, height, inline=True):
         rId, image = self.get_or_add_image(image_descriptor)
         cx, cy = image.scaled_dimensions(width, height)
         shape_id, filename = self.next_id, image.filename
-        return CT_Inline.new_pic_inline(shape_id, rId, filename, cx, cy)
+        if inline:
+            ShapeType = CT_Inline
+        else:
+            ShapeType = CT_Anchor
+        return ShapeType.new_pic_inline(shape_id, rId, filename, cx, cy)
 
     @property
     def next_id(self) -> int:
