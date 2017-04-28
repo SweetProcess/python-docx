@@ -102,6 +102,29 @@ class CT_Inline(BaseOxmlElement):
         )
 
 
+class CT_Anchor(CT_Inline):
+    """
+    ``<w:anchor>`` element, container for a floating shape.
+    """
+    wrapSquare = ZeroOrOne('wp:wrapSquare')
+
+    @classmethod
+    def _inline_xml(cls):
+        return (
+            '<wp:anchor %s>\n'
+            '  <wp:extent cx="914400" cy="914400"/>\n'
+            '  <wp:wordSquare wrapText="bothSides" />\n'
+            '  <wp:docPr id="666" name="unnamed"/>\n'
+            '  <wp:cNvGraphicFramePr>\n'
+            '    <a:graphicFrameLocks noChangeAspect="1"/>\n'
+            '  </wp:cNvGraphicFramePr>\n'
+            '  <a:graphic>\n'
+            '    <a:graphicData uri="URI not set"/>\n'
+            '  </a:graphic>\n'
+            '</wp:anchor>' % nsdecls('wp', 'a', 'pic', 'r')
+        )
+
+
 class CT_NonVisualDrawingProps(BaseOxmlElement):
     """
     Used for ``<wp:docPr>`` element, and perhaps others. Specifies the id and

@@ -7,6 +7,12 @@ Test data builders for DrawingML XML elements
 from ...unitdata import BaseBuilder
 
 
+class CT_AnchorBuilder(BaseBuilder):
+    __tag__ = 'wp:anchor'
+    __nspfxs__ = ('wp',)
+    __attrs__ = ('distT', 'distB', 'distL', 'distR')
+
+
 class CT_BlipBuilder(BaseBuilder):
     __tag__ = 'a:blip'
     __nspfxs__ = ('a',)
@@ -193,6 +199,10 @@ def an_extent():
 
 def an_inline():
     return CT_InlineBuilder()
+
+
+def an_anchor():
+    return CT_AnchorBuilder()
 
 
 def an_nvPicPr():

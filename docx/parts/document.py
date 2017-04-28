@@ -12,7 +12,7 @@ from ..document import Document
 from .numbering import NumberingPart
 from ..opc.constants import RELATIONSHIP_TYPE as RT
 from ..opc.part import XmlPart
-from ..oxml.shape import CT_Inline
+from ..oxml.shape import CT_Anchor, CT_Inline
 from ..shape import InlineShapes
 from ..shared import lazyproperty
 from .settings import SettingsPart
@@ -89,10 +89,17 @@ class DocumentPart(XmlPart):
         specified by *image_descriptor* and scaled based on the values of
         *width* and *height*.
         """
+        return self.new_pic(image_descriptor, width, height, inline=True)
+
+    def new_pic(self, image_descriptor, width, height, inline=True):
         rId, image = self.get_or_add_image(image_descriptor)
         cx, cy = image.scaled_dimensions(width, height)
         shape_id, filename = self.next_id, image.filename
-        return CT_Inline.new_pic_inline(shape_id, rId, filename, cx, cy)
+        if inline:
+            ShapeType = CT_Inline
+        else:
+            ShapeType = CT_Anchor
+        return ShapeType.new_pic_inline(shape_id, rId, filename, cx, cy)
 
     @property
     def next_id(self):
