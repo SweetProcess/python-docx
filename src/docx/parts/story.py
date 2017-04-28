@@ -62,13 +62,14 @@ class StoryPart(XmlPart):
         image_descriptor: str | IO[bytes],
         width: int | Length | None = None,
         height: int | Length | None = None,
+        inline: bool = True,
     ) -> CT_Inline:
         """Return a newly-created `w:inline` element.
 
         The element contains the image specified by `image_descriptor` and is scaled
         based on the values of `width` and `height`.
         """
-        return self.new_pic(image_descriptor, width, height, inline=True)
+        return self.new_pic(image_descriptor, width, height, inline=inline)
 
     def new_pic(self, image_descriptor, width, height, inline=True):
         rId, image = self.get_or_add_image(image_descriptor)

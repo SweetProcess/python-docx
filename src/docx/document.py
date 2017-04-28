@@ -73,6 +73,7 @@ class Document(ElementProxy):
         image_path_or_stream: str | IO[bytes],
         width: int | Length | None = None,
         height: int | Length | None = None,
+        inline: bool = True
     ):
         """Return new picture shape added in its own paragraph at end of the document.
 
@@ -85,7 +86,7 @@ class Document(ElementProxy):
         if no value is specified, as is often the case.
         """
         run = self.add_paragraph().add_run()
-        return run.add_picture(image_path_or_stream, width, height)
+        return run.add_picture(image_path_or_stream, width, height, inline)
 
     def add_section(self, start_type: WD_SECTION = WD_SECTION.NEW_PAGE):
         """Return a |Section| object newly added at the end of the document.

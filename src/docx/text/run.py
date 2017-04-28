@@ -9,7 +9,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_BREAK
 from docx.oxml.drawing import CT_Drawing
 from docx.oxml.text.pagebreak import CT_LastRenderedPageBreak
-from docx.shape import InlineShape
+from docx.shape import InlineShape, AnchorShape
 from docx.shared import StoryChild
 from docx.styles.style import CharacterStyle
 from docx.text.font import Font
@@ -61,6 +61,7 @@ class Run(StoryChild):
         image_path_or_stream: str | IO[bytes],
         width: int | Length | None = None,
         height: int | Length | None = None,
+        inline: bool = True
     ) -> InlineShape:
         """Return |InlineShape| containing image identified by `image_path_or_stream`.
 
@@ -75,10 +76,21 @@ class Run(StoryChild):
         ratio of the image. The native size of the picture is calculated using the dots-
         per-inch (dpi) value specified in the image file, defaulting to 72 dpi if no
         value is specified, as is often the case.
+
+        *inline* boolean true if the picture is inline with text,Add commentMore actions
+        false if floated.
         """
-        inline = self.part.new_pic_inline(image_path_or_stream, width, height)
-        self._r.add_drawing(inline)
-        return InlineShape(inline)
+        image = self.part.new_pic_inline(
+            image_path_or_stream, width, height, inline=inline
+        )
+        self._r.add_drawing(image)
+
+        if inline:
+            ShapeType = InlineShape
+        else:
+            ShapeType = AnchorShape
+
+        return ShapeType(image)
 
     def add_tab(self) -> None:
         """Add a ``<w:tab/>`` element at the end of the run, which Word interprets as a
