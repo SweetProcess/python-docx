@@ -70,7 +70,7 @@ class StoryPart(XmlPart):
         """
         return self.new_pic(image_descriptor, width, height)
 
-    def new_pic(self, image_descriptor, width, height, position=None, wrap=None):
+    def new_pic(self, image_descriptor, width, height, position=None, margin=None, wrap=None):
         """
         Return a new `w:inline` or `w:anchor` element containing the image
         specified by *image_descriptor* and scaled based on the values of
@@ -79,7 +79,7 @@ class StoryPart(XmlPart):
         can specify settings for the wrap, the default is:
         ``wrapSquare wrapText='bothSides'
         """
-        
+
         rId, image = self.get_or_add_image(image_descriptor)
         cx, cy = image.scaled_dimensions(width, height)
         shape_id, filename = self.next_id, image.filename
@@ -87,7 +87,7 @@ class StoryPart(XmlPart):
             ShapeType = CT_Inline
         else:
             ShapeType = CT_Anchor
-        return ShapeType.new_pic_inline(shape_id, rId, filename, cx, cy, position, wrap)
+        return ShapeType.new_pic(shape_id, rId, filename, cx, cy, position, margin, wrap)
 
     @property
     def next_id(self) -> int:
