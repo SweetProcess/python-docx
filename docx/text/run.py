@@ -47,7 +47,9 @@ class Run(Parented):
             br.clear = clear
 
     def add_picture(
-            self, image_path_or_stream, width=None, height=None, inline=True):
+            self, image_path_or_stream, width=None, height=None,
+            position=None, wrap=None
+    ):
         """
         Return an |InlineShape| instance containing the image identified by
         *image_path_or_stream*, added to the end of this run.
@@ -62,12 +64,12 @@ class Run(Parented):
         *inline* boolean true if the picture is inline with text,
         false if floated.
         """
-        image = self.part.new_pic_inline(
-            image_path_or_stream, width, height, inline=inline
+        image = self.part.new_pic(
+            image_path_or_stream, width, height, position, wrap
         )
         self._r.add_drawing(image)
 
-        if inline:
+        if position is None:
             ShapeType = InlineShape
         else:
             ShapeType = AnchorShape

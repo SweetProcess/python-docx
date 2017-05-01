@@ -83,23 +83,34 @@ class DocumentPart(XmlPart):
         """
         return InlineShapes(self._element.body, self)
 
-    def new_pic_inline(self, image_descriptor, width, height, inline=True):
+    def new_pic_inline(self, image_descriptor, width, height):
         """
         Return a newly-created `w:inline` element containing the image
         specified by *image_descriptor* and scaled based on the values of
         *width* and *height*.
         """
-        return self.new_pic(image_descriptor, width, height, inline=inline)
+        return self.new_pic(image_descriptor, width, height)
 
-    def new_pic(self, image_descriptor, width, height, inline=True):
+    def new_pic(
+            self, image_descriptor, width, height, position=None, wrap=None):
+        """
+        Return a new `w:inline` or `w:anchor` element containing the image
+        specified by *image_descriptor* and scaled based on the values of
+        *width* and *height*. *position* is a tuple specifying the positionH
+        and positionV, setting this will float the image in `w:anchor`. *wrap*
+        can specify settings for the wrap, the default is:
+        ``wrapSquare wrapText='bothSides'
+        """
         rId, image = self.get_or_add_image(image_descriptor)
         cx, cy = image.scaled_dimensions(width, height)
         shape_id, filename = self.next_id, image.filename
-        if inline:
+        if position is None:
             ShapeType = CT_Inline
         else:
             ShapeType = CT_Anchor
-        return ShapeType.new_pic_inline(shape_id, rId, filename, cx, cy)
+        return ShapeType.new_pic(
+            shape_id, rId, filename, cx, cy, position, wrap
+        )
 
     @property
     def next_id(self):
