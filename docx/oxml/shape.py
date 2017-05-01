@@ -115,7 +115,9 @@ class CT_Anchor(CT_Inline):
     @classmethod
     def _inline_xml(cls):
         return (
-            '<wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="0" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1" %s>\n'
+            '<wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0"'
+            '           relativeHeight="0" behindDoc="0" locked="0"'
+            '           layoutInCell="1" allowOverlap="1" %s>\n'
             '  <wp:simplePos x="0" y="0" />\n'
             '  <wp:positionH relativeFrom="margin">\n'
             '   <wp:align>right</wp:align>\n'
