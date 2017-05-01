@@ -142,10 +142,10 @@ class CT_Anchor(CT_Inline):
         anchor.positionV.getchildren()[0].text = positionV
 
         if margin is not None:
-            anchor.distT = margin.get('top', 0)
-            anchor.distR = margin.get('right', 0)
-            anchor.distB = margin.get('bottom', 0)
-            anchor.distL = margin.get('left', 0)
+            anchor.set('distT', margin.get('top', 0))
+            anchor.set('distR', margin.get('right', 0))
+            anchor.set('distB', margin.get('bottom', 0))
+            anchor.set('distL', margin.get('left', 0))
 
         if wrap is not None:
             anchor.wrapSquare.set('wrapText', wrap)
@@ -162,8 +162,8 @@ class CT_Anchor(CT_Inline):
             '  <wp:positionH relativeFrom="margin">\n'
             '   <wp:align>right</wp:align>\n'
             '  </wp:positionH>\n'
-            '  <wp:positionV relativeFrom="margin">\n'
-            '   <wp:align>center</wp:align>\n'
+            '  <wp:positionV relativeFrom="paragraph">\n'
+            '   <wp:posOffset>3810</wp:posOffset>\n'
             '  </wp:positionV>\n'
             '  <wp:extent cx="914400" cy="914400"/>\n'
             '  <wp:effectExtent l="0" t="0" r="0" b="0" />\n'
