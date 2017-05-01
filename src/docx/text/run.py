@@ -61,7 +61,7 @@ class Run(StoryChild):
         image_path_or_stream: str | IO[bytes],
         width: int | Length | None = None,
         height: int | Length | None = None,
-        inline: bool = True
+        position=None, wrap=None
     ) -> InlineShape:
         """Return |InlineShape| containing image identified by `image_path_or_stream`.
 
@@ -81,11 +81,11 @@ class Run(StoryChild):
         false if floated.
         """
         image = self.part.new_pic_inline(
-            image_path_or_stream, width, height, inline=inline
+            image_path_or_stream, width, height, position, wrap
         )
         self._r.add_drawing(image)
 
-        if inline:
+        if position is None:
             ShapeType = InlineShape
         else:
             ShapeType = AnchorShape

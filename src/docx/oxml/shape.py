@@ -74,7 +74,7 @@ class CT_Inline(BaseOxmlElement):
     )
 
     @classmethod
-    def new(cls, cx: Length, cy: Length, shape_id: int, pic: CT_Picture) -> CT_Inline:
+    def new(cls, cx: Length, cy: Length, shape_id: int, pic: CT_Picture,  position=None, wrap=None) -> CT_Inline:
         """Return a new ``<wp:inline>`` element populated with the values passed as
         parameters."""
         inline = cast(CT_Inline, parse_xml(cls._inline_xml()))
@@ -88,7 +88,7 @@ class CT_Inline(BaseOxmlElement):
 
     @classmethod
     def new_pic_inline(
-        cls, shape_id: int, rId: str, filename: str, cx: Length, cy: Length
+        cls, shape_id: int, rId: str, filename: str, cx: Length, cy: Length,  position=None, wrap=None
     ) -> CT_Inline:
         """Create `wp:inline` element containing a `pic:pic` element.
 
@@ -96,9 +96,16 @@ class CT_Inline(BaseOxmlElement):
         """
         pic_id = 0  # Word doesn't seem to use this, but does not omit it
         pic = CT_Picture.new(pic_id, filename, rId, cx, cy)
-        inline = cls.new(cx, cy, shape_id, pic)
+        inline = cls.new(cx, cy, shape_id, pic, position, wrap)
         inline.graphic.graphicData._insert_pic(pic)
         return inline
+    
+    @classmethod
+    def new_pic(
+            cls, shape_id: int, rId: str, filename: str, cx: Length, cy: Length, position=None, wrap=None):
+        return cls.new_pic_inline(
+            shape_id, rId, filename, cx, cy, position, wrap
+        )
 
     @classmethod
     def _inline_xml(cls):
@@ -125,6 +132,29 @@ class CT_Anchor(CT_Inline):
     positionV = OneAndOnlyOne('wp:positionV')
     effectExtent = OneAndOnlyOne('wp:effectExtent')
     wrapSquare = ZeroOrOne('wp:wrapSquare')
+
+    @classmethod
+    def new(cls, cx: Length, cy: Length, shape_id: int, pic: BaseOxmlElement, position=None, wrap=None):
+        """
+        Return a new ``<wp:inline>`` element populated with the values passed
+        as parameters.
+        """
+        anchor = parse_xml(cls._inline_xml())
+        anchor.extent.cx = cx
+        anchor.extent.cy = cy
+        anchor.docPr.id = shape_id
+        anchor.docPr.name = 'Picture %d' % shape_id
+        anchor.graphic.graphicData.uri = (
+            'http://schemas.openxmlformats.org/drawingml/2006/picture'
+        )
+        anchor.graphic.graphicData._insert_pic(pic)
+        if position is not None:
+            positionH, positionV = position
+            anchor.positionH.getchildren()[0].text = positionH
+            anchor.positionV.getchildren()[0].text = positionV
+        if wrap is not None:
+            anchor.wrapSquare.set('wrapText', wrap)
+        return anchor
 
     @classmethod
     def _inline_xml(cls):
@@ -208,9 +238,9 @@ class CT_Picture(BaseOxmlElement):
             '      <a:off x="0" y="0"/>\n'
             '      <a:ext cx="914400" cy="914400"/>\n'
             "    </a:xfrm>\n"
-            "    <a:prstGeom prst="rect">\n'
-            '     <a:avLst />\n'
-            "    </a:prstGeom>\n'
+            '    <a:prstGeom prst="rect">\n'
+            "     <a:avLst />\n"
+            "    </a:prstGeom>\n"
             "  </pic:spPr>\n"
             "</pic:pic>" % nsdecls("pic", "a", "r")
         )
