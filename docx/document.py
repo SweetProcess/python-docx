@@ -64,7 +64,7 @@ class Document(ElementProxy):
 
     def add_picture(
             self, image_path_or_stream, width=None, height=None,
-            position=None, wrap=None
+            position=None, margin=None, wrap=None
     ):
         """
         Return a new picture shape added in its own paragraph at the end of
@@ -80,7 +80,7 @@ class Document(ElementProxy):
         """
         run = self.add_paragraph().add_run()
         return run.add_picture(
-            image_path_or_stream, width, height, position, wrap
+            image_path_or_stream, width, height, position, margin, wrap
         )
 
     def add_section(self, start_type=WD_SECTION.NEW_PAGE):

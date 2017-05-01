@@ -58,7 +58,7 @@ class CT_Inline(BaseOxmlElement):
     graphic = OneAndOnlyOne('a:graphic')
 
     @classmethod
-    def new(cls, cx, cy, shape_id, pic, position=None, wrap=None):
+    def new(cls, cx, cy, shape_id, pic, position=None, margin=None, wrap=None):
         """
         Return a new ``<wp:inline>`` element populated with the values passed
         as parameters.
@@ -76,22 +76,24 @@ class CT_Inline(BaseOxmlElement):
 
     @classmethod
     def new_pic_inline(
-            cls, shape_id, rId, filename, cx, cy, position=None, wrap=None):
+            cls, shape_id, rId, filename, cx, cy,
+            position=None, margin=None, wrap=None):
         """
         Return a new `wp:inline` element containing the `pic:pic` element
         specified by the argument values.
         """
         pic_id = 0  # Word doesn't seem to use this, but does not omit it
         pic = CT_Picture.new(pic_id, filename, rId, cx, cy)
-        inline = cls.new(cx, cy, shape_id, pic, position, wrap)
+        inline = cls.new(cx, cy, shape_id, pic, position, margin, wrap)
         inline.graphic.graphicData._insert_pic(pic)
         return inline
 
     @classmethod
     def new_pic(
-            cls, shape_id, rId, filename, cx, cy, position=None, wrap=None):
+            cls, shape_id, rId, filename, cx, cy,
+            position=None, margin=None, wrap=None):
         return cls.new_pic_inline(
-            shape_id, rId, filename, cx, cy, position, wrap
+            shape_id, rId, filename, cx, cy, position, margin, wrap
         )
 
     @classmethod
@@ -121,7 +123,7 @@ class CT_Anchor(CT_Inline):
     wrapSquare = ZeroOrOne('wp:wrapSquare')
 
     @classmethod
-    def new(cls, cx, cy, shape_id, pic, position, wrap=None):
+    def new(cls, cx, cy, shape_id, pic, position, margin=None, wrap=None):
         """
         Return a new ``<wp:inline>`` element populated with the values passed
         as parameters.
@@ -138,8 +140,16 @@ class CT_Anchor(CT_Inline):
         positionH, positionV = position
         anchor.positionH.getchildren()[0].text = positionH
         anchor.positionV.getchildren()[0].text = positionV
+
+        if margin is not None:
+            anchor.distT = margin.get('top', 0)
+            anchor.distR = margin.get('right', 0)
+            anchor.distB = margin.get('bottom', 0)
+            anchor.distL = margin.get('left', 0)
+
         if wrap is not None:
             anchor.wrapSquare.set('wrapText', wrap)
+
         return anchor
 
     @classmethod

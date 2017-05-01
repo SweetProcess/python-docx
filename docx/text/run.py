@@ -48,7 +48,7 @@ class Run(Parented):
 
     def add_picture(
             self, image_path_or_stream, width=None, height=None,
-            position=None, wrap=None
+            position=None, margin=None, wrap=None
     ):
         """
         Return an |InlineShape| instance containing the image identified by
@@ -65,7 +65,7 @@ class Run(Parented):
         false if floated.
         """
         image = self.part.new_pic(
-            image_path_or_stream, width, height, position, wrap
+            image_path_or_stream, width, height, position, margin, wrap
         )
         self._r.add_drawing(image)
 
