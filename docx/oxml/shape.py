@@ -138,14 +138,14 @@ class CT_Anchor(CT_Inline):
         )
         anchor.graphic.graphicData._insert_pic(pic)
         positionH, positionV = position
-        anchor.positionH.getchildren()[0].text = positionH
-        anchor.positionV.getchildren()[0].text = positionV
+        anchor.positionH.getchildren()[0].text = unicode(positionH)
+        anchor.positionV.getchildren()[0].text = unicode(positionV)
 
         if margin is not None:
-            anchor.set('distT', margin.get('top', 0))
-            anchor.set('distR', margin.get('right', 0))
-            anchor.set('distB', margin.get('bottom', 0))
-            anchor.set('distL', margin.get('left', 0))
+            anchor.set('distT', unicode(margin.get('top', 0)))
+            anchor.set('distR', unicode(margin.get('right', 0)))
+            anchor.set('distB', unicode(margin.get('bottom', 0)))
+            anchor.set('distL', unicode(margin.get('left', 0)))
 
         if wrap is not None:
             anchor.wrapSquare.set('wrapText', wrap)
