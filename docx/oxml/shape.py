@@ -142,10 +142,10 @@ class CT_Anchor(CT_Inline):
         anchor.positionV.getchildren()[0].text = unicode(positionV)
 
         if margin is not None:
-            anchor.set('distT', unicode(margin.get('top', 0)))
-            anchor.set('distR', unicode(margin.get('right', 0)))
-            anchor.set('distB', unicode(margin.get('bottom', 0)))
-            anchor.set('distL', unicode(margin.get('left', 0)))
+            anchor.set('distT', u"%d" % margin.get('top', 0))
+            anchor.set('distR', u"%d" % margin.get('right', 0))
+            anchor.set('distB', u"%d" % margin.get('bottom', 0))
+            anchor.set('distL', u"%d" % margin.get('left', 0))
 
         if wrap is not None:
             anchor.wrapSquare.set('wrapText', wrap)
