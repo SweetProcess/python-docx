@@ -6,6 +6,8 @@ Enumerations related to DrawingML shapes in WordprocessingML files
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from .base import Enumeration, EnumMember
+
 
 class WD_INLINE_SHAPE_TYPE(object):
     """
@@ -35,3 +37,20 @@ class WD_ANCHOR_SHAPE_TYPE(object):
 
 
 WD_ANCHOR_SHAPE = WD_ANCHOR_SHAPE_TYPE
+
+
+class WRAP_SHAPE_TYPE(Enumeration):
+
+    __ms_name__ = ''
+    __members__ = (
+
+        EnumMember(
+            'wrapSquareBothSides', 'bothSides',
+            'A square wrapped shape with text wrapping on both sides'
+        ),
+
+        EnumMember(
+            'wrapTopAndBottom', '',
+            'A square on its own line cleared on left and right'
+        )
+    )

@@ -8,12 +8,13 @@ from . import parse_xml
 from .ns import nsdecls
 from .simpletypes import (
     ST_Coordinate, ST_DrawingElementId, ST_PositiveCoordinate,
-    ST_RelationshipId, XsdString, XsdToken
+    ST_RelationshipId, XsdString, XsdStringEnumeration, XsdToken
 )
 from .xmlchemy import (
     BaseOxmlElement, OneAndOnlyOne, OptionalAttribute, RequiredAttribute,
     ZeroOrOne
 )
+from ..enum.shape import WRAP_SHAPE_TYPE
 
 
 class CT_Blip(BaseOxmlElement):
@@ -32,6 +33,29 @@ class CT_BlipFillProperties(BaseOxmlElement):
     blip = ZeroOrOne('a:blip', successors=(
         'a:srcRect', 'a:tile', 'a:stretch'
     ))
+
+
+class ST_WrapText(XsdStringEnumeration):
+    """
+    Valid values for `wrapText/@val`.
+    """
+    BOTHSIDES = 'bothSides'
+
+    _members = (BOTHSIDES,)
+
+
+class CT_WrapSquare(BaseOxmlElement):
+    """
+    ``<wp:wrapSquare wrapText="bothSides" />`` element for wrapping text
+    around a shape
+    """
+    wrapText = RequiredAttribute('wrapText', ST_WrapText)
+
+
+class CT_WrapTopAndBottom(BaseOxmlElement):
+    """
+    ``<wp:wrapTopAndBottom />`` element for setting image on its own.
+    """
 
 
 class CT_GraphicalObject(BaseOxmlElement):
@@ -121,6 +145,7 @@ class CT_Anchor(CT_Inline):
     positionV = OneAndOnlyOne('wp:positionV')
     effectExtent = OneAndOnlyOne('wp:effectExtent')
     wrapSquare = ZeroOrOne('wp:wrapSquare')
+    wrapTopAndBottom = ZeroOrOne('wp:wrapTopAndBottom')
 
     @classmethod
     def new(cls, cx, cy, shape_id, pic, position, margin=None, wrap=None):
@@ -147,8 +172,15 @@ class CT_Anchor(CT_Inline):
             anchor.set('distB', u"%d" % margin.get('bottom', 0))
             anchor.set('distL', u"%d" % margin.get('left', 0))
 
-        if wrap is not None:
-            anchor.wrapSquare.set('wrapText', wrap)
+        wrap_el = None
+        if wrap == WRAP_SHAPE_TYPE.wrapTopAndBottom:
+            wrap_el = anchor.get_or_add_wrapTopAndBottom()
+        elif wrap == WRAP_SHAPE_TYPE.wrapSquareBothSides:
+            wrap_el = anchor.get_or_add_wrapSquare()
+            wrap_el.wrapText = ST_WrapText.BOTHSIDES
+
+        if wrap_el is not None:
+            anchor.insert_element_before(wrap_el, 'wp:effectExtent')
 
         return anchor
 
@@ -167,7 +199,6 @@ class CT_Anchor(CT_Inline):
             '  </wp:positionV>\n'
             '  <wp:extent cx="914400" cy="914400"/>\n'
             '  <wp:effectExtent l="0" t="0" r="0" b="0" />\n'
-            '  <wp:wrapSquare wrapText="bothSides" />\n'
             '  <wp:docPr id="666" name="unnamed"/>\n'
             '  <wp:cNvGraphicFramePr>\n'
             '    <a:graphicFrameLocks %s noChangeAspect="1"/>\n'
