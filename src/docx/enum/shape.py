@@ -31,3 +31,10 @@ class WD_ANCHOR_SHAPE_TYPE(enum.Enum):
 
 
 WD_ANCHOR_SHAPE = WD_ANCHOR_SHAPE_TYPE
+
+
+class WRAP_SHAPE_TYPE(enum.Enum):
+    """Enumeration for shape wrapping types."""
+
+    SQUARE_BOTH_SIDES = 'bothSides' # 'A square wrapped shape with text wrapping on both sides'
+    TOP_AND_BOTTOM = '' # 'A square on its own line cleared on left and right'
