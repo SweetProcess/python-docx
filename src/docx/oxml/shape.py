@@ -58,6 +58,14 @@ class ST_WrapText(XsdStringEnumeration):
     _members = (BOTHSIDES,)
 
 
+class ST_RelFromH(XsdStringEnumeration):
+    """
+    Valid values for `relativeFrom/@val` in CT_PosH.
+    """
+    MARGIN = 'margin'
+    CHARACTER = 'character'
+
+
 class CT_WrapSquare(BaseOxmlElement):
     """
     ``<wp:wrapSquare wrapText="bothSides" />`` element for wrapping text
@@ -85,6 +93,16 @@ class CT_GraphicalObjectData(BaseOxmlElement):
 
     pic: CT_Picture = ZeroOrOne("pic:pic")  # pyright: ignore[reportAssignmentType]
     uri: str = RequiredAttribute("uri", XsdToken)  # pyright: ignore[reportAssignmentType]
+
+
+class CT_PosH(BaseOxmlElement):
+    """
+    ``<wp:positionH relativeFrom="margin">`` for setting how shapes are
+    horizontally positioned.
+    """
+    relativeFrom = RequiredAttribute('relativeFrom', ST_RelFromH)
+    align = ZeroOrOne('wp:align')
+    posOffset = ZeroOrOne('wp:posOffset')
 
 
 class CT_Inline(BaseOxmlElement):
@@ -176,7 +194,16 @@ class CT_Anchor(CT_Inline):
         anchor.graphic.graphicData._insert_pic(pic)
         if position is not None:
             positionH, positionV = position
-            anchor.positionH.getchildren()[0].text = positionH
+            
+            if positionH is None:
+                anchor.positionH.set('relativeFrom', 'character')
+                pos = anchor.positionH._add_posOffset()
+                pos.text = "0"
+            else:
+                anchor.positionH.set('relativeFrom', 'margin')
+                align = anchor.positionH._add_align()
+                align.text = positionH
+
             anchor.positionV.getchildren()[0].text = positionV
 
         if margin is not None:
@@ -205,7 +232,6 @@ class CT_Anchor(CT_Inline):
             '           layoutInCell="1" allowOverlap="0" %s>\n'
             '  <wp:simplePos x="0" y="0" />\n'
             '  <wp:positionH relativeFrom="margin">\n'
-            '   <wp:align>right</wp:align>\n'
             '  </wp:positionH>\n'
             '  <wp:positionV relativeFrom="line">\n'
             '   <wp:posOffset>0</wp:posOffset>\n'
