@@ -189,9 +189,9 @@ class CT_Anchor(CT_Inline):
         else:
             anchor.positionH.set('relativeFrom', 'margin')
             align = anchor.positionH._add_align()
-            align.text = unicode(positionH)
+            align.text = positionH
 
-        anchor.positionV.getchildren()[0].text = unicode(positionV)
+        anchor.positionV.getchildren()[0].text = positionV
 
         if margin is not None:
             anchor.set('distT', u"%d" % margin.get('top', 0))
