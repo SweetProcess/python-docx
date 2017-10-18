@@ -8,12 +8,13 @@ from . import parse_xml
 from .ns import nsdecls
 from .simpletypes import (
     ST_Coordinate, ST_DrawingElementId, ST_PositiveCoordinate,
-    ST_RelationshipId, XsdString, XsdToken
+    ST_RelationshipId, XsdString, XsdStringEnumeration, XsdToken
 )
 from .xmlchemy import (
     BaseOxmlElement, OneAndOnlyOne, OptionalAttribute, RequiredAttribute,
     ZeroOrOne
 )
+from ..enum.shape import WRAP_SHAPE_TYPE
 
 
 class CT_Blip(BaseOxmlElement):
@@ -34,6 +35,37 @@ class CT_BlipFillProperties(BaseOxmlElement):
     ))
 
 
+class ST_WrapText(XsdStringEnumeration):
+    """
+    Valid values for `wrapText/@val`.
+    """
+    BOTHSIDES = 'bothSides'
+
+    _members = (BOTHSIDES,)
+
+
+class ST_RelFromH(XsdStringEnumeration):
+    """
+    Valid values for `relativeFrom/@val` in CT_PosH.
+    """
+    MARGIN = 'margin'
+    CHARACTER = 'character'
+
+
+class CT_WrapSquare(BaseOxmlElement):
+    """
+    ``<wp:wrapSquare wrapText="bothSides" />`` element for wrapping text
+    around a shape
+    """
+    wrapText = RequiredAttribute('wrapText', ST_WrapText)
+
+
+class CT_WrapTopAndBottom(BaseOxmlElement):
+    """
+    ``<wp:wrapTopAndBottom />`` element for setting image on its own.
+    """
+
+
 class CT_GraphicalObject(BaseOxmlElement):
     """
     ``<a:graphic>`` element, container for a DrawingML object
@@ -49,6 +81,16 @@ class CT_GraphicalObjectData(BaseOxmlElement):
     uri = RequiredAttribute('uri', XsdToken)
 
 
+class CT_PosH(BaseOxmlElement):
+    """
+    ``<wp:positionH relativeFrom="margin">`` for setting how shapes are
+    horizontally positioned.
+    """
+    relativeFrom = RequiredAttribute('relativeFrom', ST_RelFromH)
+    align = ZeroOrOne('wp:align')
+    posOffset = ZeroOrOne('wp:posOffset')
+
+
 class CT_Inline(BaseOxmlElement):
     """
     ``<w:inline>`` element, container for an inline shape.
@@ -58,7 +100,7 @@ class CT_Inline(BaseOxmlElement):
     graphic = OneAndOnlyOne('a:graphic')
 
     @classmethod
-    def new(cls, cx, cy, shape_id, pic):
+    def new(cls, cx, cy, shape_id, pic, position=None, margin=None, wrap=None):
         """
         Return a new ``<wp:inline>`` element populated with the values passed
         as parameters.
@@ -75,16 +117,26 @@ class CT_Inline(BaseOxmlElement):
         return inline
 
     @classmethod
-    def new_pic_inline(cls, shape_id, rId, filename, cx, cy):
+    def new_pic_inline(
+            cls, shape_id, rId, filename, cx, cy,
+            position=None, margin=None, wrap=None):
         """
         Return a new `wp:inline` element containing the `pic:pic` element
         specified by the argument values.
         """
         pic_id = 0  # Word doesn't seem to use this, but does not omit it
         pic = CT_Picture.new(pic_id, filename, rId, cx, cy)
-        inline = cls.new(cx, cy, shape_id, pic)
+        inline = cls.new(cx, cy, shape_id, pic, position, margin, wrap)
         inline.graphic.graphicData._insert_pic(pic)
         return inline
+
+    @classmethod
+    def new_pic(
+            cls, shape_id, rId, filename, cx, cy,
+            position=None, margin=None, wrap=None):
+        return cls.new_pic_inline(
+            shape_id, rId, filename, cx, cy, position, margin, wrap
+        )
 
     @classmethod
     def _inline_xml(cls):
@@ -99,6 +151,88 @@ class CT_Inline(BaseOxmlElement):
             '    <a:graphicData uri="URI not set"/>\n'
             '  </a:graphic>\n'
             '</wp:inline>' % nsdecls('wp', 'a', 'pic', 'r')
+        )
+
+
+class CT_Anchor(CT_Inline):
+    """
+    ``<w:anchor>`` element, container for a floating shape.
+    """
+    simplePos = OneAndOnlyOne('wp:simplePos')
+    positionH = OneAndOnlyOne('wp:positionH')
+    positionV = OneAndOnlyOne('wp:positionV')
+    effectExtent = OneAndOnlyOne('wp:effectExtent')
+    wrapSquare = ZeroOrOne('wp:wrapSquare')
+    wrapTopAndBottom = ZeroOrOne('wp:wrapTopAndBottom')
+
+    @classmethod
+    def new(cls, cx, cy, shape_id, pic, position, margin=None, wrap=None):
+        """
+        Return a new ``<wp:inline>`` element populated with the values passed
+        as parameters.
+        """
+        anchor = parse_xml(cls._inline_xml())
+        anchor.extent.cx = cx
+        anchor.extent.cy = cy
+        anchor.docPr.id = shape_id
+        anchor.docPr.name = 'Picture %d' % shape_id
+        anchor.graphic.graphicData.uri = (
+            'http://schemas.openxmlformats.org/drawingml/2006/picture'
+        )
+        anchor.graphic.graphicData._insert_pic(pic)
+        positionH, positionV = position
+
+        if positionH is None:
+            anchor.positionH.set('relativeFrom', 'character')
+            pos = anchor.positionH._add_posOffset()
+            pos.text = "0"
+        else:
+            anchor.positionH.set('relativeFrom', 'margin')
+            align = anchor.positionH._add_align()
+            align.text = positionH
+
+        anchor.positionV.getchildren()[0].text = positionV
+
+        if margin is not None:
+            anchor.set('distT', u"%d" % margin.get('top', 0))
+            anchor.set('distR', u"%d" % margin.get('right', 0))
+            anchor.set('distB', u"%d" % margin.get('bottom', 0))
+            anchor.set('distL', u"%d" % margin.get('left', 0))
+
+        wrap_el = None
+        if wrap == WRAP_SHAPE_TYPE.wrapTopAndBottom:
+            wrap_el = anchor.get_or_add_wrapTopAndBottom()
+        elif wrap == WRAP_SHAPE_TYPE.wrapSquareBothSides:
+            wrap_el = anchor.get_or_add_wrapSquare()
+            wrap_el.wrapText = ST_WrapText.BOTHSIDES
+
+        if wrap_el is not None:
+            anchor.insert_element_before(wrap_el, 'wp:effectExtent')
+
+        return anchor
+
+    @classmethod
+    def _inline_xml(cls):
+        return (
+            '<wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0"'
+            '           relativeHeight="0" behindDoc="0" locked="0"'
+            '           layoutInCell="1" allowOverlap="0" %s>\n'
+            '  <wp:simplePos x="0" y="0" />\n'
+            '  <wp:positionH relativeFrom="margin">\n'
+            '  </wp:positionH>\n'
+            '  <wp:positionV relativeFrom="line">\n'
+            '   <wp:posOffset>0</wp:posOffset>\n'
+            '  </wp:positionV>\n'
+            '  <wp:extent cx="914400" cy="914400"/>\n'
+            '  <wp:effectExtent l="0" t="0" r="0" b="0" />\n'
+            '  <wp:docPr id="666" name="unnamed"/>\n'
+            '  <wp:cNvGraphicFramePr>\n'
+            '    <a:graphicFrameLocks %s noChangeAspect="1"/>\n'
+            '  </wp:cNvGraphicFramePr>\n'
+            '  <a:graphic %s>\n'
+            '    <a:graphicData uri="URI not set"/>\n'
+            '  </a:graphic>\n'
+            '</wp:anchor>' % (nsdecls('wp'), nsdecls('a'), nsdecls('a'))
         )
 
 
@@ -160,7 +294,9 @@ class CT_Picture(BaseOxmlElement):
             '      <a:off x="0" y="0"/>\n'
             '      <a:ext cx="914400" cy="914400"/>\n'
             '    </a:xfrm>\n'
-            '    <a:prstGeom prst="rect"/>\n'
+            '    <a:prstGeom prst="rect">\n'
+            '     <a:avLst />\n'
+            '    </a:prstGeom>\n'
             '  </pic:spPr>\n'
             '</pic:pic>' % nsdecls('pic', 'a', 'r')
         )

@@ -62,7 +62,10 @@ class Document(ElementProxy):
         """
         return self._body.add_paragraph(text, style)
 
-    def add_picture(self, image_path_or_stream, width=None, height=None):
+    def add_picture(
+            self, image_path_or_stream, width=None, height=None,
+            position=None, margin=None, wrap=None
+    ):
         """
         Return a new picture shape added in its own paragraph at the end of
         the document. The picture contains the image at
@@ -76,7 +79,9 @@ class Document(ElementProxy):
         is often the case.
         """
         run = self.add_paragraph().add_run()
-        return run.add_picture(image_path_or_stream, width, height)
+        return run.add_picture(
+            image_path_or_stream, width, height, position, margin, wrap
+        )
 
     def add_section(self, start_type=WD_SECTION.NEW_PAGE):
         """

@@ -6,3 +6,10 @@
 _scratch/
 Session.vim
 /.tox/
+*.swp
+*.cache
+.Python
+bin
+include
+lib
+pip-selfcheck.json

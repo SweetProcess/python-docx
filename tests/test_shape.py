@@ -10,11 +10,12 @@ import pytest
 
 from docx.enum.shape import WD_INLINE_SHAPE
 from docx.oxml.ns import nsmap
-from docx.shape import InlineShape, InlineShapes
+from docx.shape import AnchorShape, InlineShape, InlineShapes
 from docx.shared import Length
 
 from .oxml.unitdata.dml import (
     a_blip, a_blipFill, a_graphic, a_graphicData, a_pic, an_inline,
+    an_anchor,
 )
 from .unitutil.cxml import element, xml
 from .unitutil.mock import loose_mock
@@ -76,6 +77,71 @@ class DescribeInlineShapes(object):
         parent_ = loose_mock(request, name='parent_')
         inline_shapes = InlineShapes(None, parent_)
         return inline_shapes, parent_
+
+
+class DescribeAncorShape(object):
+
+    def it_knows_what_type_of_shape_it_is(self, shape_type_fixture):
+        shape, shape_type = shape_type_fixture
+        assert shape.type == shape_type
+
+    @pytest.fixture(params=[
+        'embed pic', 'link pic', 'link+embed pic', 'chart', 'smart art',
+        'not implemented'
+    ])
+    def shape_type_fixture(self, request):
+        if request.param == 'embed pic':
+            inline = self._with_picture(embed=True)
+            shape_type = WD_INLINE_SHAPE.PICTURE
+
+        elif request.param == 'link pic':
+            inline = self._with_picture(link=True)
+            shape_type = WD_INLINE_SHAPE.LINKED_PICTURE
+
+        elif request.param == 'link+embed pic':
+            inline = self._with_picture(embed=True, link=True)
+            shape_type = WD_INLINE_SHAPE.LINKED_PICTURE
+
+        elif request.param == 'chart':
+            inline = self._with_uri(nsmap['c'])
+            shape_type = WD_INLINE_SHAPE.CHART
+
+        elif request.param == 'smart art':
+            inline = self._with_uri(nsmap['dgm'])
+            shape_type = WD_INLINE_SHAPE.SMART_ART
+
+        elif request.param == 'not implemented':
+            inline = self._with_uri('foobar')
+            shape_type = WD_INLINE_SHAPE.NOT_IMPLEMENTED
+
+        return AnchorShape(inline), shape_type
+
+    def _with_picture(self, embed=False, link=False):
+        picture_ns = nsmap['pic']
+
+        blip_bldr = a_blip()
+        if embed:
+            blip_bldr.with_embed('rId1')
+        if link:
+            blip_bldr.with_link('rId2')
+
+        image = (
+            an_anchor().with_nsdecls('wp', 'r').with_child(
+                a_graphic().with_nsdecls().with_child(
+                    a_graphicData().with_uri(picture_ns).with_child(
+                        a_pic().with_nsdecls().with_child(
+                            a_blipFill().with_child(
+                                blip_bldr)))))
+        ).element
+        return image
+
+    def _with_uri(self, uri):
+        inline = (
+            an_anchor().with_nsdecls('wp').with_child(
+                a_graphic().with_nsdecls().with_child(
+                    a_graphicData().with_uri(uri)))
+        ).element
+        return inline
 
 
 class DescribeInlineShape(object):

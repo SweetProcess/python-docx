@@ -9,7 +9,7 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
-from .enum.shape import WD_INLINE_SHAPE
+from .enum.shape import WD_INLINE_SHAPE, WD_ANCHOR_SHAPE
 from .oxml.ns import nsmap
 from .shared import Parented
 
@@ -101,3 +101,30 @@ class InlineShape(object):
     def width(self, cx):
         self._inline.extent.cx = cx
         self._inline.graphic.graphicData.pic.spPr.cx = cx
+
+
+class AnchorShape(InlineShape):
+    """
+    Proxy for an ``<wp:anchor>`` element, representing the container for a
+    positioned graphical element.
+    """
+
+    @property
+    def type(self):
+        """
+        The type of this anchored shape as a member of
+        ``docx.enum.shape.WD_INLINE_SHAPE``, e.g. ``LINKED_PICTURE``.
+        Read-only.
+        """
+        graphicData = self._inline.graphic.graphicData
+        uri = graphicData.uri
+        if uri == nsmap['pic']:
+            blip = graphicData.pic.blipFill.blip
+            if blip.link is not None:
+                return WD_ANCHOR_SHAPE.LINKED_PICTURE
+            return WD_ANCHOR_SHAPE.PICTURE
+        if uri == nsmap['c']:
+            return WD_ANCHOR_SHAPE.CHART
+        if uri == nsmap['dgm']:
+            return WD_ANCHOR_SHAPE.SMART_ART
+        return WD_ANCHOR_SHAPE.NOT_IMPLEMENTED
