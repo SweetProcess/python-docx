@@ -8,9 +8,7 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
-from ..oxml.shape import CT_Anchor, CT_Inline
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from docx.oxml.shape import CT_Anchor, CT_Inline
 from docx.document import Document
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.parts.hdrftr import FooterPart, HeaderPart
