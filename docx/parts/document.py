@@ -8,26 +8,41 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
-from ..document import Document
-from .numbering import NumberingPart
-from ..opc.constants import RELATIONSHIP_TYPE as RT
-from ..opc.part import XmlPart
 from ..oxml.shape import CT_Anchor, CT_Inline
-from ..shape import InlineShapes
-from ..shared import lazyproperty
-from .settings import SettingsPart
-from .styles import StylesPart
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from docx.document import Document
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
+from docx.parts.hdrftr import FooterPart, HeaderPart
+from docx.parts.numbering import NumberingPart
+from docx.parts.settings import SettingsPart
+from docx.parts.story import BaseStoryPart
+from docx.parts.styles import StylesPart
+from docx.shape import InlineShapes
+from docx.shared import lazyproperty
 
 
-class DocumentPart(XmlPart):
+class DocumentPart(BaseStoryPart):
+    """Main document part of a WordprocessingML (WML) package, aka a .docx file.
+
+    Acts as broker to other parts such as image, core properties, and style parts. It
+    also acts as a convenient delegate when a mid-document object needs a service
+    involving a remote ancestor. The `Parented.part` property inherited by many content
+    objects provides access to this part object for that purpose.
     """
-    Main document part of a WordprocessingML (WML) package, aka a .docx file.
-    Acts as broker to other parts such as image, core properties, and style
-    parts. It also acts as a convenient delegate when a mid-document object
-    needs a service involving a remote ancestor. The `Parented.part` property
-    inherited by many content objects provides access to this part object for
-    that purpose.
-    """
+
+    def add_footer_part(self):
+        """Return (footer_part, rId) pair for newly-created footer part."""
+        footer_part = FooterPart.new(self.package)
+        rId = self.relate_to(footer_part, RT.FOOTER)
+        return footer_part, rId
+
+    def add_header_part(self):
+        """Return (header_part, rId) pair for newly-created header part."""
+        header_part = HeaderPart.new(self.package)
+        rId = self.relate_to(header_part, RT.HEADER)
+        return header_part, rId
+
     @property
     def core_properties(self):
         """
@@ -43,19 +58,13 @@ class DocumentPart(XmlPart):
         """
         return Document(self._element, self)
 
-    def get_or_add_image(self, image_descriptor):
-        """
-        Return an (rId, image) 2-tuple for the image identified by
-        *image_descriptor*. *image* is an |Image| instance providing access
-        to the properties of the image, such as dimensions and image type.
-        *rId* is the key for the relationship between this document part and
-        the image part, reused if already present, newly created if not.
-        """
-        image_part = self._package.image_parts.get_or_add_image_part(
-            image_descriptor
-        )
-        rId = self.relate_to(image_part, RT.IMAGE)
-        return rId, image_part.image
+    def drop_header_part(self, rId):
+        """Remove related header part identified by *rId*."""
+        self.drop_rel(rId)
+
+    def footer_part(self, rId):
+        """Return |FooterPart| related by *rId*."""
+        return self.related_parts[rId]
 
     def get_style(self, style_id, style_type):
         """
@@ -74,6 +83,10 @@ class DocumentPart(XmlPart):
         present in the document.
         """
         return self.styles.get_style_id(style_or_name, style_type)
+
+    def header_part(self, rId):
+        """Return |HeaderPart| related by *rId*."""
+        return self.related_parts[rId]
 
     @lazyproperty
     def inline_shapes(self):
