@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import IO, TYPE_CHECKING, cast
 
 from docx.document import Document
-from docx.enum.style import WD_STYLE_TYPE
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.parts.hdrftr import FooterPart, HeaderPart
 from docx.parts.numbering import NumberingPart
@@ -16,6 +15,7 @@ from docx.shape import InlineShapes
 from docx.shared import lazyproperty
 
 if TYPE_CHECKING:
+    from docx.enum.style import WD_STYLE_TYPE
     from docx.opc.coreprops import CoreProperties
     from docx.settings import Settings
     from docx.styles.style import BaseStyle
@@ -89,14 +89,13 @@ class DocumentPart(StoryPart):
         return InlineShapes(self._element.body, self)
 
     @lazyproperty
-    def numbering_part(self):
-        """A |NumberingPart| object providing access to the numbering definitions for
-        this document.
+    def numbering_part(self) -> NumberingPart:
+        """A |NumberingPart| object providing access to the numbering definitions for this document.
 
         Creates an empty numbering part if one is not present.
         """
         try:
-            return self.part_related_by(RT.NUMBERING)
+            return cast(NumberingPart, self.part_related_by(RT.NUMBERING))
         except KeyError:
             numbering_part = NumberingPart.new()
             self.relate_to(numbering_part, RT.NUMBERING)
