@@ -8,13 +8,13 @@ from typing import cast
 
 import pytest
 
-from ..src.docx.document import Document
-from ..src.docx.enum.shape import WD_INLINE_SHAPE
-from ..src.docx.oxml.document import CT_Body
-from ..src.docx.oxml.ns import nsmap
-from ..src.docx.oxml.shape import CT_Inline
-from ..src.docx.shape import AnchorShape, InlineShape, InlineShapes
-from ..src.docx.shared import Length, Emu
+from docx.document import Document
+from docx.enum.shape import WD_INLINE_SHAPE
+from docx.oxml.document import CT_Body
+from docx.oxml.ns import nsmap
+from docx.oxml.shape import CT_Inline
+from docx.shape import AnchorShape, InlineShape, InlineShapes
+from docx.shared import Length, Emu
 
 from .oxml.unitdata.dml import (
     a_blip, a_blipFill, a_graphic, a_graphicData, a_pic, an_inline,
