@@ -238,7 +238,6 @@ class CT_Anchor(CT_Inline):
             '  </wp:positionV>\n'
             '  <wp:extent cx="914400" cy="914400"/>\n'
             '  <wp:effectExtent l="0" t="0" r="0" b="0" />\n'
-            '  <wp:wrapSquare wrapText="bothSides" />\n'
             '  <wp:docPr id="666" name="unnamed"/>\n'
             '  <wp:cNvGraphicFramePr>\n'
             '    <a:graphicFrameLocks %s noChangeAspect="1"/>\n'
