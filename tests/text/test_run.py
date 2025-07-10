@@ -308,12 +308,12 @@ class DescribeRun:
         run = Run(cast(CT_R, element("w:r/wp:x")), paragraph_)
         image = "foobar.png"
         width, height, inline = 1111, 2222, element("wp:inline{id=42}")
-        document_part_.new_pic_inline.return_value = inline
+        document_part_.new_pic.return_value = inline
         InlineShape_.return_value = picture_
 
         picture = run.add_picture(image, width, height)
 
-        document_part_.new_pic_inline.assert_called_once_with(image, width, height)
+        document_part_.new_pic.assert_called_once_with(image, width, height, None, None, None)
         assert run._r.xml == xml("w:r/(wp:x,w:drawing/wp:inline{id=42})")
         InlineShape_.assert_called_once_with(inline)
         assert picture is picture_
