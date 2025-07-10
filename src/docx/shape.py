@@ -7,9 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .enum.shape import WD_INLINE_SHAPE, WD_ANCHOR_SHAPE
-from .oxml.ns import nsmap
-from .shared import Parented
+from docx.enum.shape import WD_INLINE_SHAPE, WD_ANCHOR_SHAPE
+from docx.oxml.ns import nsmap
+from docx.shared import Parented
 
 if TYPE_CHECKING:
     from docx.oxml.document import CT_Body
