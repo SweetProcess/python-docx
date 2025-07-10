@@ -9,18 +9,18 @@ from typing import cast
 import pytest
 
 from docx.document import Document
-from docx.enum.shape import WD_INLINE_SHAPE
+from docx.enum.shape import WD_INLINE_SHAPE, WD_ANCHOR_SHAPE
 from docx.oxml.document import CT_Body
 from docx.oxml.ns import nsmap
 from docx.oxml.shape import CT_Inline
 from docx.shape import AnchorShape, InlineShape, InlineShapes
 from docx.shared import Length, Emu
 
+
 from .oxml.unitdata.dml import (
     a_blip, a_blipFill, a_graphic, a_graphicData, a_pic, an_inline,
     an_anchor,
 )
-
 from .unitutil.cxml import element, xml
 from .unitutil.mock import FixtureRequest, Mock, instance_mock
 
@@ -80,27 +80,27 @@ class DescribeAncorShape:
     def shape_type_fixture(self, request):
         if request.param == 'embed pic':
             inline = self._with_picture(embed=True)
-            shape_type = WD_INLINE_SHAPE.PICTURE
+            shape_type = WD_ANCHOR_SHAPE.PICTURE
 
         elif request.param == 'link pic':
             inline = self._with_picture(link=True)
-            shape_type = WD_INLINE_SHAPE.LINKED_PICTURE
+            shape_type = WD_ANCHOR_SHAPE.LINKED_PICTURE
 
         elif request.param == 'link+embed pic':
             inline = self._with_picture(embed=True, link=True)
-            shape_type = WD_INLINE_SHAPE.LINKED_PICTURE
+            shape_type = WD_ANCHOR_SHAPE.LINKED_PICTURE
 
         elif request.param == 'chart':
             inline = self._with_uri(nsmap['c'])
-            shape_type = WD_INLINE_SHAPE.CHART
+            shape_type = WD_ANCHOR_SHAPE.CHART
 
         elif request.param == 'smart art':
             inline = self._with_uri(nsmap['dgm'])
-            shape_type = WD_INLINE_SHAPE.SMART_ART
+            shape_type = WD_ANCHOR_SHAPE.SMART_ART
 
         elif request.param == 'not implemented':
             inline = self._with_uri('foobar')
-            shape_type = WD_INLINE_SHAPE.NOT_IMPLEMENTED
+            shape_type = WD_ANCHOR_SHAPE.NOT_IMPLEMENTED
 
         return AnchorShape(inline), shape_type
 
