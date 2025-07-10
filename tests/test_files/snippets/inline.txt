@@ -22,7 +22,9 @@
             <a:off x="0" y="0"/>
             <a:ext cx="444" cy="888"/>
           </a:xfrm>
-          <a:prstGeom prst="rect"/>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
         </pic:spPr>
       </pic:pic>
     </a:graphicData>
